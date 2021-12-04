@@ -10,4 +10,5 @@ fun readComplexInput(name: String, delimiter: String = " "): List<List<String>> 
 
 private fun readRawInput(name: String): List<String> = File("src", "$name.txt")
     .readLines()
+    .map(String::trim)
     .filter(String::isNotBlank)
