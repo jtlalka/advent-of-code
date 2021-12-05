@@ -6,14 +6,16 @@ repositories {
     mavenCentral()
 }
 
-tasks {
-    sourceSets {
-        main {
-            java.srcDirs("src")
-        }
-    }
+dependencies {
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.6.0")
+}
 
+tasks {
     wrapper {
         gradleVersion = "7.3"
+    }
+    test {
+        useJUnitPlatform()
     }
 }

@@ -1,5 +1,8 @@
-/** Day 3 */
-fun main() {
+package net.tlalka.aoc2021
+
+import net.tlalka.aoc2021.common.toInt
+
+class Day03 {
 
     fun part1(input: List<String>): Int {
         val inputRange = input.first().indices
@@ -39,15 +42,7 @@ fun main() {
                 }
             }
         }
+
         return oxygen.first().toInt(2) * carbon.first().toInt(2)
     }
-
-    listOf("Day03-test", "Day03-data")
-        .map(::readStringInput)
-        .onEach {
-            println(part1(it)) // 22 * 9 = 198
-            println(part2(it)) // 23 * 10 = 230
-        }
 }
-
-private fun Boolean.toInt() = if (this) 1 else 0
