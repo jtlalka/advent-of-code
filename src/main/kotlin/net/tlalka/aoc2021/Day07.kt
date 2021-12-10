@@ -1,12 +1,13 @@
 package net.tlalka.aoc2021
 
+import net.tlalka.aoc2021.common.median
 import kotlin.math.absoluteValue
 
 class Day07 {
 
     fun part1(input: List<String>): Int {
         val data = input.parseInput()
-        val median = data.size.let { (data[it / 2] + data[(it - 1) / 2]) / 2 }
+        val median = data.median()
 
         return data.fold(0) { acc, i ->
             acc + (median - i).absoluteValue
