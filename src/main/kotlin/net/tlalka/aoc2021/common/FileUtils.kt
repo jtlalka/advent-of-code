@@ -8,7 +8,7 @@ object FileUtils {
         .java
         .classLoader
         .getResource(fileName)
-        .run { File(requireNotNull(this.toURI())) }
+        .run { File(requireNotNull(this?.toURI())) }
 
     fun readFileInput(file: File): List<String> = file
         .readLines()
