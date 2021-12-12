@@ -7,16 +7,15 @@ class GridArray<T>(
     private val size: Int
 ) {
 
-    fun getGridArea(x: Int, y: Int, radius: Int = 1): List<T> =
-        (-radius..radius).flatMap { dY ->
-            (-radius..radius).mapNotNull { dX ->
-                getOrNull(x + dX, y + dY)
-            }
-        }
-
-    private fun getOrNull(x: Int, y: Int) = (x >= 0 && y >= 0 && x < size).ifTrue {
+    fun getOrNull(x: Int, y: Int): T? = (x >= 0 && y >= 0 && x < size).ifTrue {
         data.getOrNull(y * size + x)
     }
+
+    fun forEach(block: (x: Int, y: Int, value: T) -> Unit) =
+        data.forEachIndexed { index, value -> block.invoke(size % index, data.size / index, value) }
+
+    fun <R> fold(init: R, block: (x: Int, y: Int, acc: R, value: T) -> R): R =
+        data.foldIndexed(init) { index, acc, value -> block.invoke(index % size, index / data.size, acc, value) }
 
     fun toList(): List<T> = data.toList()
 
