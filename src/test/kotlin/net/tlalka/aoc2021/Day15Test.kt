@@ -15,21 +15,21 @@ class Day15Test {
 
     @Test
     fun `verify part 1 with sample input`() {
-        assertEquals(0L, tested.part1(sampleInput))
+        assertEquals(40, tested.part1(sampleInput))
     }
 
     @Test
     fun `verify part 1 with puzzle input`() {
-        assertEquals(0L, tested.part1(puzzleInput))
+        assertEquals(366, tested.part1(puzzleInput))
     }
 
     @Test
     fun `verify part 2 with sample input`() {
-        assertEquals(0L, tested.part2(sampleInput))
+        assertEquals(315, tested.part2(sampleInput))
     }
 
     @Test
     fun `verify part 2 with puzzle input`() {
-        assertEquals(0L, tested.part2(puzzleInput))
+        assertEquals(2829, tested.part2(puzzleInput))
     }
 }
