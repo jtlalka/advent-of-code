@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.6.0"
+    kotlin("jvm") version "2.1.0"
 }
 
 repositories {
@@ -7,13 +7,13 @@ repositories {
 }
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.6.0")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.11.3")
+    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:2.1.0")
 }
 
 tasks {
     wrapper {
-        gradleVersion = "7.3"
+        gradleVersion = "8.7"
     }
     test {
         useJUnitPlatform()
