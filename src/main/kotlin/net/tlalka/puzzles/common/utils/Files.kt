@@ -1,9 +1,9 @@
-package net.tlalka.puzzles.common
+package net.tlalka.puzzles.common.utils
 
 import java.io.File
 import kotlin.reflect.KClass
 
-object FileUtils {
+object Files {
 
     fun loadFile(
         clazz: KClass<*>,
