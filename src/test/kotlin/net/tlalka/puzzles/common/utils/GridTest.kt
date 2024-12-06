@@ -1,6 +1,7 @@
 package net.tlalka.puzzles.common.utils
 
 import net.tlalka.puzzles.common.utils.Grid.Companion.toGrid
+import net.tlalka.puzzles.common.utils.Grid.Dimension
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
@@ -21,21 +22,42 @@ class GridTest {
             }
         }
 
-        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9), result)
+        assertEquals(listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 0), result)
     }
 
     @Test
-    fun `returns sub grid when getGrid function is triggered`() {
-        val result = tested.getGrid(x = 0, y = 1, sizeX = 2, sizeY = 3)
+    fun `returns reduced grid when new grid size is bigger then original grid`() {
+        val result = tested.getGrid(x = 0, y = 0, Dimension(100))
 
-        assertEquals("[[4, 5], [7, 8], [0]]", result.toString())
+        assertEquals("[[1, 2, 3, 4, 5, 6, 7, 8, 9, 0]]", result.toList().toString())
+    }
+
+    @Test
+    fun `returns reduced grid when new grid size is smaller then original grid`() {
+        val result = tested.getGrid(x = 0, y = 1, Dimension(2, 3))
+
+        assertEquals("[[4, 5], [7, 8], [0]]", result.toList().toString())
+    }
+
+    @Test
+    fun `returns reduced grid when new grid size is contains single element`() {
+        val result = tested.getGrid(x = 0, y = 3, Dimension(1, 1))
+
+        assertEquals("[[0]]", result.toList().toString())
+    }
+
+    @Test
+    fun `returns reduced grid when new grid start position is out of original grid`() {
+        val result = tested.getGrid(x = 100, y = 100, Dimension(2))
+
+        assertEquals("[]", result.toList().toString())
     }
 
     @Test
     fun `returns mapped grid when map function is triggered`() {
         val result = tested.map { x, y, value -> value.takeIf { x < 2 } }
 
-        assertEquals("[[1, 2, null], [4, 5, null], [7, 8, null], [0]]", result.toString())
+        assertEquals("[[1, 2, null], [4, 5, null], [7, 8, null], [0]]", result.toList().toString())
     }
 
     @Test
@@ -132,12 +154,20 @@ class GridTest {
     fun `returns chunked list string when toString function is triggered`() {
         val result = tested.toString()
 
-        assertEquals("[[1, 2, 3], [4, 5, 6], [7, 8, 9], [0]]", result)
+        assertEquals(
+            expected = """
+                1 2 3
+                4 5 6
+                7 8 9
+                0
+            """.trimIndent(),
+            actual = result
+        )
     }
 
     @Test
     fun `compare different representation of the same grid`() {
-        val result = "1234567890".map { "$it".toInt() }.toGrid(3)
+        val result = "1234567890".map { "$it".toInt() }.toGrid(line = 3)
 
         assertEquals(result, tested)
     }
