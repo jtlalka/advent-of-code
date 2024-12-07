@@ -1,33 +1,40 @@
 package net.tlalka.puzzles.aoc2024
 
+import net.tlalka.puzzles.aoc2024.Day04.Vector.LEFT_DOWN
+import net.tlalka.puzzles.aoc2024.Day04.Vector.LEFT_UP
+import net.tlalka.puzzles.aoc2024.Day04.Vector.RIGHT_DOWN
+import net.tlalka.puzzles.aoc2024.Day04.Vector.RIGHT_UP
 import net.tlalka.puzzles.common.extension.puzzleFile
 import net.tlalka.puzzles.common.extension.readInput
 import net.tlalka.puzzles.common.extension.sampleFile
-import net.tlalka.puzzles.common.utils.Grid.Companion.toGrid
+import net.tlalka.puzzles.common.utils.Grid.Builder.toGrid
+import net.tlalka.puzzles.common.utils.Grid.Point
 
 class Day04 {
 
     fun part1(input: List<String>): Int {
-        val grid = input.map { it.toList() }.toGrid()
+        val grid = input.map(String::toList).toGrid()
 
-        return grid.sumOf { x, y, _ ->
+        return grid.sumOf { (x, y), _ ->
             Vector.entries.count { (dx, dy) ->
                 "XMAS".withIndex().all { (index, letter) ->
-                    grid.getOrNull(x = x + index * dx, y = y + index * dy) == letter
+                    grid.getOrNull(Point(x = x + index * dx, y = y + index * dy)) == letter
                 }
             }
         }
     }
 
     fun part2(input: List<String>): Int {
-        val grid = input.map { it.toList() }.toGrid()
+        val grid = input.map(String::toList).toGrid()
 
-        return grid.count { x, y, value ->
+        return grid.count { point, value ->
             value == 'A' &&
-                setOf(grid.getOrNull(x = x - 1, y = y - 1), grid.getOrNull(x = x + 1, y = y + 1)) == MS &&
-                setOf(grid.getOrNull(x = x + 1, y = y - 1), grid.getOrNull(x = x - 1, y = y + 1)) == MS
+                setOf(grid.getOrNull(point + LEFT_UP), grid.getOrNull(point + RIGHT_DOWN)) == MS &&
+                setOf(grid.getOrNull(point + RIGHT_UP), grid.getOrNull(point + LEFT_DOWN)) == MS
         }
     }
+
+    private operator fun Point.plus(vector: Vector) = Point(x = x + vector.dx, y = y + vector.dy)
 
     private enum class Vector(val dx: Int, val dy: Int) {
         RIGHT(dx = 1, dy = 0),

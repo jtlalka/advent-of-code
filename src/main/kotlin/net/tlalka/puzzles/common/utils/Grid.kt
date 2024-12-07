@@ -4,63 +4,69 @@ import net.tlalka.puzzles.common.extension.ifTrue
 import net.tlalka.puzzles.common.extension.toInt
 
 data class Grid<T>(
-    private val data: MutableList<T>,
-    val dimension: Dimension
+    private val data: List<T>,
+    private val size: Size
 ) {
 
-    private inline val Int.x: Int get() = this % dimension.x
-    private inline val Int.y: Int get() = this / dimension.y
+    private inline val Int.point: Point get() = Point(x = this % size.x, y = this / size.x)
+    private inline val Point.index: Int get() = y * size.x + x
 
-    fun getOrNull(x: Int, y: Int): T? =
-        (x in 0..<dimension.x && y in 0..dimension.y).ifTrue {
-            data.getOrNull(index = y * dimension.x + x)
-        }
-
-    fun setValue(x: Int, y: Int, element: T) {
-        val index = y * dimension.x + x
-        if (index in 0..<data.lastIndex) {
-            data.set(index = index, element = element)
-        }
-    }
-
-    fun getGrid(x: Int, y: Int, dimension: Dimension): Grid<T> {
-        val isValidX: Int.() -> Boolean = { this in x..<x + dimension.x }
-        val isValidY: Int.() -> Boolean = { this in y..<y + dimension.y }
-        val newData = data.filterIndexed { index, _ -> index.x.isValidX() && index.y.isValidY() }
-
-        return Grid(data = newData.toMutableList(), dimension = dimension)
-    }
-
-    fun <R> map(block: (x: Int, y: Int, value: T) -> R): Grid<R> = Grid(
-        data = data.mapIndexed { index, value -> block(index.x, index.y, value) }.toMutableList(),
-        dimension = dimension
+    constructor(data: List<List<T>>) : this(
+        data = data.flatten(),
+        size = Size(x = data.maxOf { it.size }, y = data.size)
     )
 
-    fun forEach(block: (x: Int, y: Int, value: T) -> Unit) =
+    fun getOrNull(point: Point): T? =
+        size.contains(point).ifTrue {
+            data.getOrNull(index = point.index)
+        }
+
+    fun setValue(point: Point, element: T) {
+        if (point.index <= data.lastIndex) {
+            (data as MutableList<T>).set(index = point.index, element = element)
+        }
+    }
+
+    fun getGrid(point: Point, size: Size) = Grid(
+        data = data.filterIndexed { index, _ -> size.contains(index.point - point) },
+        size = size
+    )
+
+    fun <R> map(block: (point: Point, value: T) -> R): Grid<R> = Grid(
+        data = data.mapIndexed { index, value -> block(index.point, value) },
+        size = size
+    )
+
+    fun forEach(block: (point: Point, value: T) -> Unit) =
         data.forEachIndexed { index, value ->
-            block(index.x, index.y, value)
+            block(index.point, value)
         }
 
-    fun sumOf(block: (x: Int, y: Int, value: T) -> Int): Int =
+    fun sumOf(block: (point: Point, value: T) -> Int): Int =
         data.foldIndexed(initial = 0) { index, acc, value ->
-            acc + block(index.x, index.y, value)
+            acc + block(index.point, value)
         }
 
-    fun count(block: (x: Int, y: Int, value: T) -> Boolean): Int =
+    fun count(block: (point: Point, value: T) -> Boolean): Int =
         data.foldIndexed(initial = 0) { index, acc, value ->
-            acc + block(index.x, index.y, value).toInt()
+            acc + block(index.point, value).toInt()
         }
 
-    fun indexOf(element: T): Point = data.indexOf(element)
-        .let { index -> Point(index.x, index.y) }
+    fun indexOf(element: T): Point = data.indexOf(element).point
 
-    fun toList(): List<List<T>> = data.chunked(dimension.x)
+    fun lastIndex(): Point = data.lastIndex.point
 
-    override fun toString(): String = data.chunked(dimension.x)
+    fun size(): Size = size.copy()
+
+    fun toList(): List<List<T>> = data.chunked(size.x)
+
+    fun copy(): Grid<T> = Grid(data = data.toList(), size = size)
+
+    override fun toString(): String = data.chunked(size.x)
         .joinToString(separator = "\n") { it.joinToString(separator = " ") }
 
-    data class Dimension(val x: Int, val y: Int) {
-        constructor(size: Int) : this(size, size)
+    data class Size(val x: Int, val y: Int) {
+        fun contains(point: Point): Boolean = point.x in 0..<x && point.y in 0..<y
     }
 
     data class Point(val x: Int, val y: Int) {
@@ -68,13 +74,8 @@ data class Grid<T>(
         operator fun minus(point: Point) = Point(x = x - point.x, y = y - point.y)
     }
 
-    companion object {
-
-        inline fun <reified T> List<List<T>>.toGrid() = flatten().toGrid(maxOf { it.size })
-
-        inline fun <reified T> List<T>.toGrid(line: Int) = Grid(
-            data = toMutableList(),
-            dimension = Dimension(x = line, y = size / line)
-        )
+    companion object Builder {
+        inline fun <reified T> List<T>.toGrid(xSize: Int) = Grid(data = chunked(xSize))
+        inline fun <reified T> List<List<T>>.toGrid() = Grid(data = this)
     }
 }

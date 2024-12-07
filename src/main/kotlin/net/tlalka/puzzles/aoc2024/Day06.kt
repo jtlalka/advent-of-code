@@ -5,69 +5,66 @@ import net.tlalka.puzzles.common.extension.puzzleFile
 import net.tlalka.puzzles.common.extension.readInput
 import net.tlalka.puzzles.common.extension.sampleFile
 import net.tlalka.puzzles.common.utils.Grid
-import net.tlalka.puzzles.common.utils.Grid.Companion.toGrid
+import net.tlalka.puzzles.common.utils.Grid.Builder.toGrid
 import net.tlalka.puzzles.common.utils.Grid.Point
 
 class Day06 {
 
     fun part1(input: List<String>): Int {
         val grid = input.map(String::toList).toGrid()
+        var position = grid.indexOf(GUARD)
         var vector = Vector.UP
-        var (x, y) = grid.indexOf(GUARD)
 
-        while (grid.getOrNull(x, y) != null) {
-            if (grid.getOrNull(x = x + vector.x, y = y + vector.y) == '#') {
+        while (grid.getOrNull(position) != null) {
+            if (grid.getOrNull(point = position + vector) == '#') {
                 vector = vector.next()
                 continue
             }
-            x += vector.x
-            y += vector.y
-            grid.setValue(x, y, MARKER_X)
+            position += vector
+            grid.setValue(position, MARKER_X)
         }
-        return grid.count { _, _, value -> value == MARKER_X }
+        return grid.count { _, value -> value == MARKER_X }
     }
 
     fun part2(input: List<String>): Int {
         val grid = input.map(String::toList).toGrid()
 
-        return grid.count { x, y, place ->
+        return grid.count { point, place ->
             if (place == '.') {
-                grid.getGrid(x = 0, y = 0, dimension = grid.dimension)
-                    .apply { setValue(x = x, y = y, element = '#') }
-                    .run { hasCycle(this) }
+                findCycle(grid.copy().apply { setValue(point, element = '#') })
             } else {
                 false
             }
         }
     }
 
-    private fun hasCycle(grid: Grid<Char>): Boolean {
+    private fun findCycle(grid: Grid<Char>): Boolean {
         val trace = mutableListOf<Pair<Vector, Point>>()
-        var (x, y) = grid.indexOf(GUARD)
         var vector = Vector.UP
+        var position = grid.indexOf(GUARD)
 
-        while (grid.getOrNull(x, y) != null) {
-            if (grid.getOrNull(x = x + vector.x, y = y + vector.y) == '#') {
+        while (grid.getOrNull(position) != null) {
+            if (grid.getOrNull(position + vector) == '#') {
                 vector = vector.next()
-                trace.add(vector to Point(x, y))
+                trace.add(vector to position)
 
-                if (trace.hasCycle()) {
-                    return true
-                } else {
-                    continue
+                when (trace.hasCycle()) {
+                    true -> return true
+                    false -> continue
                 }
             }
-            x += vector.x
-            y += vector.y
+            position += vector
         }
         return false
     }
 
-    private enum class Vector(val x: Int, val y: Int, val next: () -> Vector) {
-        UP(x = 0, y = -1, next = { RIGHT }),
-        RIGHT(x = 1, y = 0, next = { DOWN }),
-        DOWN(x = 0, y = 1, next = { LEFT }),
-        LEFT(x = -1, y = 0, next = { UP })
+    private operator fun Point.plus(vector: Vector) = Point(x = x + vector.dx, y = y + vector.dy)
+
+    private enum class Vector(val dx: Int, val dy: Int, val next: () -> Vector) {
+        UP(dx = 0, dy = -1, next = { RIGHT }),
+        RIGHT(dx = 1, dy = 0, next = { DOWN }),
+        DOWN(dx = 0, dy = 1, next = { LEFT }),
+        LEFT(dx = -1, dy = 0, next = { UP })
     }
 
     companion object {
