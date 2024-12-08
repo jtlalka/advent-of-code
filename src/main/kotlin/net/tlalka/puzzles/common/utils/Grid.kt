@@ -5,7 +5,7 @@ import net.tlalka.puzzles.common.extension.toInt
 
 data class Grid<T>(
     private val data: List<T>,
-    private val size: Size
+    private val size: Size,
 ) {
 
     private inline val Int.point: Point get() = Point(x = this % size.x, y = this / size.x)
@@ -22,7 +22,7 @@ data class Grid<T>(
         }
 
     fun setValue(point: Point, element: T) {
-        if (point.index <= data.lastIndex) {
+        size.contains(point).ifTrue {
             (data as MutableList<T>).set(index = point.index, element = element)
         }
     }
@@ -41,6 +41,10 @@ data class Grid<T>(
         data.forEachIndexed { index, value ->
             block(index.point, value)
         }
+
+    fun findAll(block: (point: Point, value: T) -> Boolean): List<Pair<Point, T>> =
+        data.mapIndexed { index, value -> index.point to value }
+            .filter { (point, value) -> block(point, value) }
 
     fun sumOf(block: (point: Point, value: T) -> Int): Int =
         data.foldIndexed(initial = 0) { index, acc, value ->

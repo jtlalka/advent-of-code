@@ -79,7 +79,7 @@ class GridTest {
 
         @Test
         fun `returns null value when setValue is triggered with invalid X pointer`() {
-            val pointer = Point(x = 100, y = 0)
+            val pointer = Point(x = -100, y = 0)
 
             tested.setValue(pointer, 12)
 
@@ -101,10 +101,19 @@ class GridTest {
     inner class GridReduceTest {
 
         @Test
-        fun `returns original grid when get grid is triggered with start pointer and same size`() {
+        fun `returns same grid when get grid is triggered with start pointer and same size`() {
             val result = tested.getGrid(Point(x = 0, y = 0), tested.size())
 
             assertEquals(expected = tested, actual = result)
+        }
+
+        @Test
+        fun `returns new instance when get grid is triggered with start pointer and same size`() {
+            val result = tested.getGrid(Point(x = 0, y = 0), tested.size())
+
+            result.setValue(Point(x = 1, y = 1), 12)
+
+            assertNotEquals(illegal = tested, actual = result)
         }
 
         @Test
@@ -253,7 +262,7 @@ class GridTest {
 
         @Test
         fun `returns expected values when forEach function is triggered`() {
-            val result = buildList { tested.map { _, value -> add(value) } }
+            val result = buildList { tested.forEach { _, value -> add(value) } }
 
             assertEquals(
                 expected = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 0),
@@ -274,6 +283,42 @@ class GridTest {
                 ),
                 actual = result
             )
+        }
+
+        @Test
+        fun `returns expected values when findAll function is triggered`() {
+            val result = tested.findAll { _, value -> value < 5 }
+
+            assertEquals(
+                expected = listOf(1, 2, 3, 4, 0),
+                actual = result.map { it.second }
+            )
+        }
+
+        @Test
+        fun `returns expected pointers when findAll function is triggered`() {
+            val result = tested.findAll { point, _ -> point.x == point.y }
+
+            assertEquals(
+                expected = listOf(Point(x = 0, y = 0), Point(x = 1, y = 1), Point(x = 2, y = 2)),
+                actual = result.map { it.first }
+            )
+        }
+
+        @Test
+        fun `returns empty list when findAll function is triggered with empty precondition`() {
+            val result = tested.findAll { _, value -> value > 100 }
+
+            assertEquals(expected = emptyList(), actual = result)
+        }
+
+        @Test
+        fun `returns empty list when findAll function is triggered with empty grid`() {
+            val given = Grid(listOf(emptyList<Char>()))
+
+            val result = given.findAll { _, _ -> true }
+
+            assertEquals(expected = emptyList(), actual = result)
         }
 
         @Test
@@ -460,8 +505,6 @@ class GridTest {
             val result1 = input1.size()
             val result2 = input2.size()
 
-            println(result2)
-
             assertTrue("$result1 - $result2") { result1 == result2 }
         }
 
@@ -496,22 +539,25 @@ class GridTest {
             val result = tested.copy()
 
             assertEquals(expected = tested, actual = result)
-        }
-
-        @Test
-        fun `returns new instantiation of Grid class when copy function is triggered`() {
-            val result = tested.copy()
-
-            assertNotSame(illegal = tested::class, actual = result::class)
+            assertNotSame(illegal = tested, actual = result)
         }
 
         @Test
         fun `updates only copied grid when copy function is triggered`() {
             val given = tested.copy()
 
-            val result = given.apply { setValue(Point(0, 0), 12) }
+            val result = given.apply { setValue(Point(x = 0, y = 0), 12) }
 
             assertNotEquals(illegal = tested, actual = result)
+        }
+
+        @Test
+        fun `compare results of copy and getGrid functions when input is the same`() {
+            val result1 = tested.copy()
+            val result2 = tested.getGrid(Point(x = 0, y = 0), tested.size())
+
+            assertEquals(expected = result1, actual = result2)
+            assertNotSame(illegal = result1, actual = result2)
         }
     }
 
@@ -544,8 +590,6 @@ class GridTest {
 
             val result1 = input1.toGrid(xSize = 2)
             val result2 = input2.toGrid()
-
-            println(result2)
 
             assertTrue("$result1\n$result2") { result1 == result2 }
         }
