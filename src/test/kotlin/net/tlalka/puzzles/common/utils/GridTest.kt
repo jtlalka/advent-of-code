@@ -5,6 +5,7 @@ import net.tlalka.puzzles.common.extension.toInt
 import net.tlalka.puzzles.common.utils.Grid.Builder.toGrid
 import net.tlalka.puzzles.common.utils.Grid.Point
 import net.tlalka.puzzles.common.utils.Grid.Size
+import net.tlalka.puzzles.common.utils.Grid.Vector
 import org.junit.jupiter.api.MethodOrderer.MethodName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -286,6 +287,32 @@ class GridTest {
         }
 
         @Test
+        fun `returns expected values when travers function is triggered`() {
+            val start = Point(x = 2, y = 0)
+            val vector = Vector(dx = -1, dy = 1)
+
+            val result = buildList { tested.travers(start, vector) { _, value -> add(value) } }
+
+            assertEquals(
+                expected = listOf(3, 5, 7),
+                actual = result.toList()
+            )
+        }
+
+        @Test
+        fun `returns expected pointers when travers function is triggered`() {
+            val start = Point(x = 0, y = 0)
+            val vector = Vector(dx = 1, dy = 1)
+
+            val result = buildList { tested.travers(start, vector) { point, _ -> add(point) } }
+
+            assertEquals(
+                expected = listOf(Point(x = 0, y = 0), Point(x = 1, y = 1), Point(x = 2, y = 2)),
+                actual = result
+            )
+        }
+
+        @Test
         fun `returns expected values when findAll function is triggered`() {
             val result = tested.findAll { _, value -> value < 5 }
 
@@ -320,6 +347,11 @@ class GridTest {
 
             assertEquals(expected = emptyList(), actual = result)
         }
+    }
+
+    @Nested
+    @TestMethodOrder(MethodName::class)
+    inner class GridAggregationTest {
 
         @Test
         fun `returns sum of every elements when sumOf function is triggered`() {
@@ -450,7 +482,7 @@ class GridTest {
 
     @Nested
     @TestMethodOrder(MethodName::class)
-    inner class GridSizeTest {
+    inner class GridDimensionTest {
 
         @Test
         fun `returns grid size when Grid values represent column`() {

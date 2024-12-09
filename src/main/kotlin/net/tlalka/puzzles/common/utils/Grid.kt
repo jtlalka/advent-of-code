@@ -42,6 +42,10 @@ data class Grid<T>(
             block(index.point, value)
         }
 
+    fun travers(start: Point, vector: Vector, block: (point: Point, value: T) -> Unit) =
+        generateSequence(start) { it + vector }.takeWhile { size.contains(it) }
+            .forEach { point -> getOrNull(point)?.let { block(point, it) } }
+
     fun findAll(block: (point: Point, value: T) -> Boolean): List<Pair<Point, T>> =
         data.mapIndexed { index, value -> index.point to value }
             .filter { (point, value) -> block(point, value) }
@@ -76,6 +80,14 @@ data class Grid<T>(
     data class Point(val x: Int, val y: Int) {
         operator fun plus(point: Point) = Point(x = x + point.x, y = y + point.y)
         operator fun minus(point: Point) = Point(x = x - point.x, y = y - point.y)
+
+        operator fun plus(vector: Vector) = Point(x = x + vector.dx, y = y + vector.dy)
+        operator fun minus(vector: Vector) = Point(x = x - vector.dx, y = y - vector.dy)
+    }
+
+    data class Vector(val dx: Int, val dy: Int) {
+        operator fun plus(vector: Vector) = Vector(dx = dx + vector.dx, dy = dy + vector.dy)
+        operator fun minus(vector: Vector) = Vector(dx = dx - vector.dx, dy = dy - vector.dy)
     }
 
     companion object Builder {
